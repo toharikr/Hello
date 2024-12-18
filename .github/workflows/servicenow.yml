@@ -1,0 +1,25 @@
+name: Dispatch Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: "First parameter"
+        required: true
+        default: "default-value"
+      ami_id:
+        description: "Second parameter"
+        required: true
+      instance_type:
+        description: "Second parameter"
+        required: true
+        
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Parameters
+        run: |
+          echo "Parameter 1: ${{ github.event.inputs.aws_region }}"
+          echo "Parameter 2: ${{ github.event.inputs.ami_id }}"
+          echo "Parameter 2: ${{ github.event.inputs.instance_type }}"
