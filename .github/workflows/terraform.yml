@@ -22,8 +22,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: change dir
-        run: cd iac
+      # Set working directory to the terraform folder
+      - name: Change working directory
+        working-directory: ./iac  # Adjust to your Terraform directory
+        run: pwd
 
       # Setup Terraform
       - name: Setup Terraform
