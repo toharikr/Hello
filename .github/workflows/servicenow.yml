@@ -5,14 +5,14 @@ on:
     inputs:
       aws_region:
         description: "First parameter"
-        required: true
+        required: false
         default: "default-value"
       ami_id:
         description: "Second parameter"
-        required: true
+        required: false
       instance_type:
         description: "Second parameter"
-        required: true
+        required: false
         
 jobs:
   example-job:
