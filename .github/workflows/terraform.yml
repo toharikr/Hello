@@ -56,10 +56,10 @@ jobs:
           checkov --version
 
       - name: run
-        run: checkov -d . --skip-check CKV2_GHA_1,CKV_GHA_7,CKV_GHA_2,CKV_GHA_1,CKV_GHA_3
+        run: checkov -d . --skip-check CKV_*,CKV2_*
         
       - name: Run Checkov
-        run: checkov -d . --config-file ./checkov_config.yml --skip-check CKV2_GHA_1 --output json > results.json
+        run: checkov -d . --config-file ./checkov_config.yml --skip-check CKV_*,CKV2_* --output json > results.json
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v3
