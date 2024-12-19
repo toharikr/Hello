@@ -16,6 +16,10 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    permissions:  # Apply scoped permissions
+      contents: read
+      actions: none
+      pull-requests: write
 
     steps:
       # Checkout the repository
