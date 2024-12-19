@@ -18,8 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:  # Apply scoped permissions
       contents: read
-      actions: none
-      issues: write
+      deployments: write
 
     steps:
       # Checkout the repository
