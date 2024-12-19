@@ -1,0 +1,22 @@
+skip_checks:
+  # Skipping specific Checkov checks if you need exceptions
+  - CKV_AWS_79  # Example: Skip 'Ensure EC2 instances are managed by Auto Scaling Groups'
+  - CKV_AWS_116 # Skip 'Ensure that detailed monitoring is enabled for EC2 instances'
+
+soft_fail_checks:
+  # Allow specific checks to pass as warnings
+  - CKV_AWS_18  # Example: EC2 instances without security groups
+
+hard_fail_on_checks:
+  # Enforce critical checks to fail
+  - CKV_AWS_2   # Ensure EC2 instances are not using a public IP
+  - CKV_AWS_3   # Ensure EC2 instances use an approved AMI
+  - CKV_AWS_15  # Ensure instance metadata service v2 is enabled
+
+frameworks:
+  # Define IaC frameworks to scan
+  - terraform
+
+quiet: false     # Show full output of the scan
+compact: true    # Use a compact output format for better readability
+output: json     # Specify the output format (e.g., JSON, CLI, JUnit)
