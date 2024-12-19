@@ -47,8 +47,14 @@ jobs:
 
      
       - name: Install Checkov
-        run: pip install checkov
+        run: |
+          pip install checkov
+          pip install --upgrade checkov
+          checkov --version
 
+      - name: run
+        run: checkov -d . --config-file checkov_config.yml --verbose
+        
       - name: Run Checkov
         run: checkov -d . --config-file ./checkov_config.yml --output json > results.json
 
