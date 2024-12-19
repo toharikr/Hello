@@ -30,6 +30,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.aws_region }}
 
+      - name: Run Checkov with Custom Config
+        uses: bridgecrewio/checkov-action@v22
+        with:
+          directory: '.'
+          config-file: './checkov_config.yml'
+  
+      
       # Setup Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
