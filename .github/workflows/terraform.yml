@@ -50,17 +50,13 @@ jobs:
         run: pip install checkov
 
       - name: Run Checkov
-        run: checkov -d . --quiet --output json > results.json
+        run: checkov -d . --config-file ./checkov_config.yml --quiet --output json > results.json
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v3
         with:
          name: checkov-results
          path: results.json
-
-      - name: Run Checkov with Custom Config
-        run: checkov -d . --config-file ./checkov_config.yml --quiet --output json > results.json
-
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v3
