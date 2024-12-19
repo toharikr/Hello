@@ -53,7 +53,7 @@ jobs:
           checkov --version
 
       - name: run
-        run: checkov -d . --config-file checkov_config.yml --verbose
+        run: checkov -d .
         
       - name: Run Checkov
         run: checkov -d . --config-file ./checkov_config.yml --output json > results.json
