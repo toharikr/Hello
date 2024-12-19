@@ -50,7 +50,7 @@ jobs:
         run: pip install checkov
 
       - name: Run Checkov
-        run: checkov -d ./terraform --quiet --output json > results.json
+        run: checkov -d . --quiet --output json > results.json
 
       - name: Upload Checkov Results
         uses: actions/upload-artifact@v3
