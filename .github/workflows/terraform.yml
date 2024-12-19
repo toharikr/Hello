@@ -29,13 +29,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ github.event.inputs.aws_region }}
-
-      - name: Run Checkov with Custom Config
-        uses: bridgecrewio/checkov-action@v22
-        with:
-          directory: '.'
-          config-file: './checkov_config.yml'
-  
+ 
       
       # Setup Terraform
       - name: Setup Terraform
@@ -51,6 +45,14 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -var="aws_region=${{ github.event.inputs.aws_region }}" -var="ami_id=${{ github.event.inputs.ami_id }}" -var="instance_type=${{ github.event.inputs.instance_type }}"
 
+     
+      - name: Run Checkov with Custom Config
+        uses: bridgecrewio/checkov-action@v22
+        with:
+          directory: '.'
+          config-file: './checkov_config.yml'
+      
+      
       # Apply Terraform
       - name: Terraform Apply
         run: terraform apply -auto-approve -var="aws_region=${{ github.event.inputs.aws_region }}" -var="ami_id=${{ github.event.inputs.ami_id }}" -var="instance_type=${{ github.event.inputs.instance_type }}"
