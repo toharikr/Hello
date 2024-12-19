@@ -56,7 +56,7 @@ jobs:
           checkov --version
 
       - name: run
-        run: checkov -d . --skip-checks CKV2_GHA_1
+        run: checkov -d . --skip-check CKV2_GHA_1
         
       - name: Run Checkov
         run: checkov -d . --config-file ./checkov_config.yml --skip-check CKV2_GHA_1 --output json > results.json
