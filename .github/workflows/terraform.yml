@@ -19,7 +19,7 @@ jobs:
     permissions:  # Apply scoped permissions
       contents: read
       actions: none
-      pull-requests: write
+      issues: write
 
     steps:
       # Checkout the repository
