@@ -46,12 +46,31 @@ jobs:
         run: terraform plan -var="aws_region=${{ github.event.inputs.aws_region }}" -var="ami_id=${{ github.event.inputs.ami_id }}" -var="instance_type=${{ github.event.inputs.instance_type }}"
 
      
-      - name: Run Checkov with Custom Config
-        uses: bridgecrewio/checkov-action@v22
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Run Checkov
+        run: checkov -d ./terraform --quiet --output json > results.json
+
+      - name: Upload Checkov Results
+        uses: actions/upload-artifact@v3
         with:
-          directory: '.'
-          config-file: './checkov_config.yml'
-      
+         name: checkov-results
+         path: results.json
+
+      - name: Run Checkov with Custom Config
+        run: checkov -d . --config-file ./checkov_config.yml --quiet --output json > results.json
+
+
+      - name: Upload Checkov Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: checkov-results
+          path: results.json
+
+      - name: Fail on High Severity Issues
+        run: |
+          checkov -d . --config-file ./checkov_config.yml --soft-fail-on HIGH
       
       # Apply Terraform
       - name: Terraform Apply
