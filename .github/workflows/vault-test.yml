@@ -17,19 +17,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Authenticate to Vault using JWT
-        uses: hashicorp/vault-action@v2
+      - name: Import Secrets from HashiCorp Vault
+        uses: hashicorp/vault-action@v3
         with:
-          url: http://http://127.0.0.1:8200  # Your Vault URL
-          method: jwt
-          role: github-actions  # Vault role configured for JWT
-          jwtGithubAudience: vault.example.com  # Audience configured in Vault
+          url: ${{ secrets.VAULT_ADDR }}
+          token: ${{ secrets.VAULT_TOKEN }}
+          secrets: |
+            secret/data/my-secret MY_SECRET |
 
-      - name: Retrieve secret from Vault
+      - name: Use the secret
         run: |
-          vault kv get -format=json secret/my-secret | jq -r '.data.data.token' > token.txt
-
-      - name: Use secret token
-        run: |
-          TOKEN=$(cat token.txt)
-          echo "The retrieved token is: $TOKEN"
+          echo "The secret value is: $MY_SECRET"
