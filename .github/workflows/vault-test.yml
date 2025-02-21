@@ -60,6 +60,10 @@ jobs:
 
           vault write auth/jwt/role/my-role @role.json
 
+      - name: valur secret list
+        run: |
+            vault secrets list
+
       - name: Import Secrets from HashiCorp Vault using JWT
         uses: hashicorp/vault-action@v3
         with:
