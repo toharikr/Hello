@@ -66,9 +66,8 @@ jobs:
           method: jwt
           role: my-role
           secrets: |
-            secret/data/my-secret value
+            secret/data/my-secret my-value
 
       - name: Use the secret
         run: |
-          encoded=$(echo -n "$value" | base64)
-          echo "The secret value (base64 encoded) is: $encoded"
+          echo "The secret value is: $(echo -n $my-value | base64)"
