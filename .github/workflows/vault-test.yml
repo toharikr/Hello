@@ -72,7 +72,7 @@ jobs:
           path: github-jwt
           role: my-role
           secrets: |
-            secret/data/my-secret my_value | MY_SECRET
+            secret/data/my-secret my-value | MY_SECRET
 
       - name: Use the secret
         run: |
