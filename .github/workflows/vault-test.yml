@@ -70,5 +70,5 @@ jobs:
 
       - name: Use the secret
         run: |
-          echo "$(echo -n ${{env.my-value}} | base64)"
+          echo "$(echo -n ${{env.MY_SECRET}} | base64)"
 
