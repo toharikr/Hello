@@ -69,6 +69,7 @@ jobs:
         with:
           url: ${{ env.VAULT_ADDR }}
           method: jwt
+          path: github-jwt
           role: my-role
           secrets: |
             secret/data/my-secret my-value | MY_SECRET
