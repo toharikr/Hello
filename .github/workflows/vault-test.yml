@@ -41,7 +41,7 @@ jobs:
           echo 'path "secret/data/my-secret" { capabilities = ["read"] }' > my-policy.hcl
           vault policy write my-policy my-policy.hcl
 
-          vault auth enable jwt
+          vault auth enable -path=github-jwt jwt
           vault write auth/jwt/config oidc_discovery_url="https://token.actions.githubusercontent.com" bound_issuer="https://token.actions.githubusercontent.com"
 
           cat <<EOF > role.json
