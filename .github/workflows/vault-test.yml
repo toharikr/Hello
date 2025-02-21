@@ -22,6 +22,7 @@ jobs:
         with:
           url: http://127.0.0.1:8200
           token: ${{ secrets.VAULT_SECRET }}
+          method: jwt
           secrets: |
             secret/data/my-secret MY_SECRET | MY_SECRET
 
