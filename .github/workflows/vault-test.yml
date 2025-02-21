@@ -3,7 +3,7 @@ name: Retrieve Secret from Vault using JWT Auth
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   get-secret:
