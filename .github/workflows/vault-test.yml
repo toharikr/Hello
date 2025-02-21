@@ -72,9 +72,9 @@ jobs:
           path: github-jwt
           role: my-role
           secrets: |
-            secret/data/my-secret * | MY_SECRET
+            secret/data/my-secret my_value | MY_SECRET
 
       - name: Use the secret
         run: |
-          echo "$(echo -n ${{env.MY_SECRET}} | base64)"
+          echo "$MY_SECRET" | jq 'keys'
 
