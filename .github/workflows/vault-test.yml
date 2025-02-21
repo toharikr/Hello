@@ -20,8 +20,8 @@ jobs:
       - name: Import Secrets from HashiCorp Vault
         uses: hashicorp/vault-action@v3
         with:
-          url: ${{ secrets.VAULT_ADDR }}
-          token: ${{ secrets.VAULT_TOKEN }}
+          url: http://127.0.0.1:8200
+          token: ${{ secrets.VAULT_SECRET }}
           secrets: |
             secret/data/my-secret MY_SECRET |
 
