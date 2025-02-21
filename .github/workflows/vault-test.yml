@@ -76,5 +76,8 @@ jobs:
 
       - name: Use the secret
         run: |
-          echo "$MY_SECRET" | jq 'keys'
+          echo "All secrets JSON: $MY_SECRET"
+          echo "All secrets JSON (base64): $(echo -n "$MY_SECRET" | base64)"
+          echo "Secret keys:"
+          echo "$TF_SECRET_JSON" | jq -r 'keys[]'
 
