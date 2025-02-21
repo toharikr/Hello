@@ -67,7 +67,7 @@ jobs:
           method: jwt
           role: my-role
           secrets: |
-            secret/data/my-secret my-value | MY_SECRET
+            secret/data/my-secrets my-value | MY_SECRET
 
       - name: Use the secret
         run: |
