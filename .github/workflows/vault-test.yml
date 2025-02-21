@@ -66,8 +66,8 @@ jobs:
           method: jwt
           role: my-role
           secrets: |
-            secret/data/my-secret my-value | my-value
+            secret/data/my-secret my-value
 
       - name: Use the secret
         run: |
-          echo "The secret value is: ${{ env.my-value }}"
+          echo "The secret value is: ${{ my-value }}"
