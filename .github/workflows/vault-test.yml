@@ -1,32 +1,65 @@
-name: Retrieve Secret from Vault using JWT Auth
+name: Setup Vault, Configure Policy and Role, Retrieve Secret
 
 on:
   push:
     branches:
-      - master
+      - main
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  get-secret:
+  setup-and-fetch-secret:
     runs-on: ubuntu-latest
-
-    permissions:
-      id-token: write  # Required for JWT auth
-      contents: read
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Import Secrets from HashiCorp Vault
+      - name: Download and Install Vault
+        run: |
+          curl -fsSL https://releases.hashicorp.com/vault/1.15.4/vault_1.15.4_linux_amd64.zip -o vault.zip
+          unzip vault.zip
+          sudo mv vault /usr/local/bin/
+          vault --version
+
+      - name: Start Vault Dev Server
+        run: |
+          vault server -dev -dev-root-token-id="root" &
+          sleep 5
+          export VAULT_ADDR='http://127.0.0.1:8200'
+          export VAULT_TOKEN='root'
+          echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
+          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+
+      - name: Configure Vault Policy, Role, and Secret
+        run: |
+          vault kv put secret/my-secret my-value="HelloWorld"
+
+          echo 'path "secret/data/my-secret" { capabilities = ["read"] }' > my-policy.hcl
+          vault policy write my-policy my-policy.hcl
+
+          vault auth enable jwt
+          vault write auth/jwt/config oidc_discovery_url="https://token.actions.githubusercontent.com" bound_issuer="https://token.actions.githubusercontent.com"
+
+          vault write auth/jwt/role/my-role \
+            role_type="jwt" \
+            bound_audiences="https://github.com/toharikr" \
+            user_claim="repository" \
+            bound_claims='{"repository": "toharikr/Hello"}' \
+            policies="my-policy" \
+            ttl="1h"
+
+      - name: Import Secrets from HashiCorp Vault using JWT
         uses: hashicorp/vault-action@v3
         with:
-          url: http://127.0.0.1:8200
-          token: ${{ secrets.VAULT_SECRET }}
+          url: ${{ env.VAULT_ADDR }}
           method: jwt
           role: my-role
           secrets: |
-            secret/data/my-secret MY_SECRET | MY_SECRET
+            secret/data/my-secret my-value |
 
       - name: Use the secret
         run: |
-          echo "The secret value is: $MY_SECRET"
+          echo "The secret value is: ${{ env.my-value }}"
