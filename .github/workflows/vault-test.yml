@@ -35,6 +35,7 @@ jobs:
 
       - name: Configure Vault Policy, Role, and Secret
         run: |
+          vault secrets enable -version=2 kv
           vault kv put secret/my-secret my-value="HelloWorld"
 
           echo 'path "secret/data/my-secret" { capabilities = ["read"] }' > my-policy.hcl
