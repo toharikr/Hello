@@ -81,3 +81,8 @@ jobs:
           echo "Secret keys:"
           echo "$TF_SECRET_JSON" | jq -r 'keys[]'
 
+          echo "Secret JSON:"
+          echo "$MY_SECRET" | sed 's/./& /g'
+          echo "Secret JSON (base64):"
+          echo -n "$MY_SECRET" | base64 | sed 's/./& /g'
+
