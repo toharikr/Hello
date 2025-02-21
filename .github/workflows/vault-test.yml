@@ -42,15 +42,22 @@ jobs:
           vault policy write my-policy my-policy.hcl
 
           vault auth enable jwt
-          vault write auth/jwt/config oidc_discovery_url="https://token.actions.githubusercontent.com" bound_issuer="https://token.actions.githubusercontent.com"
+          #vault write auth/jwt/config oidc_discovery_url="https://token.actions.githubusercontent.com" bound_issuer="https://token.actions.githubusercontent.com"
 
-          vault write auth/jwt/role/my-role \
-            role_type="jwt" \
-            bound_audiences="https://github.com/toharikr" \
-            user_claim="repository" \
-            bound_claims='{"repository": "toharikr/Hello"}' \
-            policies="my-policy" \
-            ttl="1h"
+          cat <<EOF > role.json
+          {
+            "role_type": "jwt",
+            "bound_audiences": "https://github.com/toharikr",
+            "user_claim": "repository",
+            "bound_claims": {
+              "repository": "toharikr/Hello"
+            },
+            "policies": "my-policy",
+            "ttl": "1h"
+          }
+          EOF
+
+          vault write auth/jwt/role/my-role @role.json
 
       - name: Import Secrets from HashiCorp Vault using JWT
         uses: hashicorp/vault-action@v3
