@@ -50,6 +50,7 @@ jobs:
             "bound_audiences": "https://github.com/toharikr",
             "user_claim": "repository",
             "bound_claims": {
+              "environment": dev
               "repository": "toharikr/Hello"
             },
             "policies": "my-policy",
