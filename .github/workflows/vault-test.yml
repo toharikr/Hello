@@ -42,7 +42,7 @@ jobs:
           vault policy write my-policy my-policy.hcl
 
           vault auth enable -path=github-jwt jwt
-          vault write auth/jwt/config oidc_discovery_url="https://token.actions.githubusercontent.com" bound_issuer="https://token.actions.githubusercontent.com"
+          vault write auth/github-jwt/config oidc_discovery_url="https://token.actions.githubusercontent.com" bound_issuer="https://token.actions.githubusercontent.com"
 
           cat <<EOF > role.json
           {
@@ -58,7 +58,7 @@ jobs:
           }
           EOF
 
-          vault write auth/jwt/role/my-role @role.json
+          vault write auth/github-jwt/role/my-role @role.json
 
       - name: valur secret list
         run: |
