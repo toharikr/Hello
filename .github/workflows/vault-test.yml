@@ -70,4 +70,5 @@ jobs:
 
       - name: Use the secret
         run: |
-          echo "The secret value is: $(echo -n ${{ env.my-value}} | base64)"
+          encoded=$(echo -n "${{ env.my-value}}" | base64)
+          echo "The secret value (base64 encoded) is: $encoded"
