@@ -3,7 +3,7 @@ name: Vault & Terraform Secrets Engine Demo
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   vault-setup:
