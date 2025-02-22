@@ -12,6 +12,7 @@ jobs:
       # For this demo, Vault runs locally in dev mode.
       VAULT_ADDR: "http://127.0.0.1:8200"
       VAULT_TOKEN: "root"
+      TFE_API_TOKEN: ${{ secrets.T_TOKEN }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -71,7 +72,7 @@ jobs:
           # Enable the Terraform secrets engine at the path "terraform/".
           vault secrets enable terraform || echo "Terraform secrets engine already enabled"
           vault secrets list
-          vault write terraform/config token= ${{ secrets.T_TOKEN }}
+          vault write terraform/config token= "$TFE_API_TOKEN"
 
       - name: Configure Role for Team A in Terraform Secrets Engine
         run: |
