@@ -12,16 +12,6 @@ permissions:
 jobs:
   tfe-run:
     runs-on: ubuntu-latest
-    services:
-      vault:
-        image: hashicorp/vault:1.11.0
-        ports:
-          - 8200:8200
-        # Run Vault in dev mode with a known root token
-        options: >-
-          --cap-add=IPC_LOCK --entrypoint vault server -dev -dev-root-token-id=myroot
-        env:
-          VAULT_DEV_ROOT_TOKEN_ID: myroot
     env:
       # Vault configuration (using the dev server)
       VAULT_ADDR: http://localhost:8200
@@ -38,30 +28,21 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Install jq and Vault CLI
+      - name: Download and Install Vault
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq unzip
-          # Install Vault CLI if not already installed
-          if ! command -v vault &> /dev/null; then
-            wget https://releases.hashicorp.com/vault/1.11.0/vault_1.11.0_linux_amd64.zip
-            unzip vault_1.11.0_linux_amd64.zip
-            sudo mv vault /usr/local/bin/
-          fi
+          curl -fsSL https://releases.hashicorp.com/vault/1.15.4/vault_1.15.4_linux_amd64.zip -o vault.zip
+          unzip vault.zip
+          sudo mv vault /usr/local/bin/
           vault --version
 
-      - name: Wait for Vault to be Ready
+      - name: Start Vault Dev Server
         run: |
-          for i in {1..10}; do
-            if vault status > /dev/null 2>&1; then
-              echo "Vault is ready"
-              exit 0
-            fi
-            echo "Waiting for Vault to start..."
-            sleep 2
-          done
-          echo "Vault did not start in time"
-          exit 1
+          vault server -dev -dev-root-token-id="root" &
+          sleep 5
+          export VAULT_ADDR='http://127.0.0.1:8200'
+          export VAULT_TOKEN='root'
+          echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
+          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
 
       - name: Setup Vault Terraform Secrets Engine
         run: |
