@@ -71,7 +71,7 @@ jobs:
           # Enable the Terraform secrets engine at the path "terraform/".
           vault secrets enable terraform || echo "Terraform secrets engine already enabled"
           vault secrets list
-          vault write terraform/config token= ${{ secrets.M_TOKEN }}
+          vault write terraform/config token= ${{ secrets.T_TOKEN }}
 
       - name: Configure Role for Team A in Terraform Secrets Engine
         run: |
