@@ -1,127 +1,87 @@
-name: TFE Run with Vault Terraform Secrets Engine
+name: Vault & Terraform Secrets Engine Demo
 
 on:
   push:
     branches:
-      - master
-
-permissions:
-  id-token: write
-  contents: read
+      - main
 
 jobs:
-  tfe-run:
+  vault-setup:
     runs-on: ubuntu-latest
     env:
-      # Vault configuration (using the dev server)
-      VAULT_ADDR: http://localhost:8200
-      # Terraform Enterprise configuration
-      TFE_URL: "https://app.terraform.io"
-      TFE_WORKSPACE: "ws-G53XWqmDtAm9Pihb"   # Replace with your actual workspace ID
-      TFE_ORG: "self_hkr"
-      # A management token for TFE used by Vault to generate ephemeral tokens.
-      # This is pre-generated from TFE (via UI or API) with sufficient privileges.
-      MANAGEMENT_TOKEN: ${{ secrets.T_TOKEN }}
-      # Specify which team’s token you want. For example: "team1" or "team2"
-      TEAM: "team1"
+      # For this demo, Vault runs locally in dev mode.
+      VAULT_ADDR: "http://127.0.0.1:8200"
+      VAULT_TOKEN: "root"
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Download and Install Vault
+      - name: Install Vault CLI
         run: |
-          curl -fsSL https://releases.hashicorp.com/vault/1.15.4/vault_1.15.4_linux_amd64.zip -o vault.zip
-          unzip vault.zip
+          echo "Downloading Vault CLI..."
+          wget https://releases.hashicorp.com/vault/1.11.0/vault_1.11.0_linux_amd64.zip
+          unzip vault_1.11.0_linux_amd64.zip
           sudo mv vault /usr/local/bin/
           vault --version
 
-      - name: Start Vault Dev Server
+      - name: Install jq
         run: |
-          vault server -dev -dev-root-token-id="root" &
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Start Vault Server in Dev Mode
+        run: |
+          # Start Vault in dev mode in the background.
+          nohup vault server -dev -dev-root-token-id="root" > vault.log 2>&1 &
+          # Allow Vault a few seconds to start up.
           sleep 5
-          export VAULT_ADDR='http://127.0.0.1:8200'
-          export VAULT_TOKEN='root'
-          echo "VAULT_ADDR=$VAULT_ADDR" >> $GITHUB_ENV
-          echo "VAULT_TOKEN=$VAULT_TOKEN" >> $GITHUB_ENV
+          vault status
 
-      - name: Setup Vault Terraform Secrets Engine
+      - name: Enable KV Secrets Engine (Keystore)
         run: |
-          # Use the dev root token (myroot) provided by the container
-          export VAULT_ADDR=${VAULT_ADDR}
-          export VAULT_TOKEN=myroot
+          # Enable the KV secrets engine at the default path "secret/" if not already enabled.
+          vault secrets enable -path=secret kv || echo "KV engine already enabled"
+          # Write a sample team configuration for Team A.
+          vault kv put secret/team-a config="Team A configuration data"
+          vault kv get secret/team-a
 
-          # Enable the Terraform secrets engine (if not already enabled)
-          if ! vault secrets list | grep -q "^terraform/"; then
-            vault secrets enable terraform
-          fi
-
-          # Configure the TFE host for the secrets engine using the management token.
-          # This tells Vault which TFE instance to target when generating tokens.
-          vault write terraform/config/host url="${TFE_URL}" token="${MANAGEMENT_TOKEN}"
-
-          # Create roles for each team. In this example, we create two roles.
-          vault write terraform/roles/team1 ttl="1h" token_policies="default" description="Team1 ephemeral token"
-          vault write terraform/roles/team2 ttl="1h" token_policies="default" description="Team2 ephemeral token"
-
-          echo "Vault Terraform secrets engine has been configured."
-
-      - name: Retrieve Ephemeral TFE Token for Team
-        id: get-token
+      - name: Enable Terraform Secrets Engine
         run: |
-          export VAULT_ADDR=${VAULT_ADDR}
-          export VAULT_TOKEN=myroot
-          TEAM=${TEAM}  # e.g., "team1" or "team2"
-          echo "Retrieving ephemeral TFE token for team: ${TEAM}"
-          # Vault’s Terraform secrets engine generates a token on demand under the creds endpoint.
-          output=$(vault read -format=json terraform/creds/${TEAM})
-          echo "$output" | jq .
-          TFE_API_TOKEN=$(echo "$output" | jq -r '.data.token')
-          if [ -z "$TFE_API_TOKEN" ] || [ "$TFE_API_TOKEN" = "null" ]; then
-            echo "Failed to retrieve TFE API token from Vault for team ${TEAM}"
+          # Enable the Terraform secrets engine at the path "terraform/".
+          vault secrets enable terraform || echo "Terraform secrets engine already enabled"
+          vault secrets list
+
+      - name: Configure Role for Team A in Terraform Secrets Engine
+        run: |
+          # This writes a role configuration under the Terraform secrets engine for Team A.
+          # Adjust parameters (such as token_policies, token_ttl, etc.) as required.
+          vault write terraform/roles/team-a \
+            token_policies="team-a-policy" \
+            token_ttl=3600 \
+            token_max_ttl=7200 \
+            description="Ephemeral TFE token for Team A"
+          vault read terraform/roles/team-a
+
+      - name: Read Ephemeral TFE Token for Team A from Vault
+        id: read-token
+        run: |
+          # Read a dynamically generated token for Team A.
+          # Vault will generate a new ephemeral token based on the role configuration.
+          vault_output=$(vault read -format=json terraform/creds/team-a)
+          echo "$vault_output" | jq .
+          TEAM_A_TOKEN=$(echo "$vault_output" | jq -r '.data.token')
+          if [ -z "$TEAM_A_TOKEN" ] || [ "$TEAM_A_TOKEN" = "null" ]; then
+            echo "Failed to retrieve token for Team A"
             exit 1
           fi
-          echo "TFE_API_TOKEN=$TFE_API_TOKEN" >> $GITHUB_ENV
-          echo "::set-output name=tfe_token::$TFE_API_TOKEN"
-          echo "Ephemeral TFE token retrieved successfully."
+          echo "Team A Ephemeral Token: $TEAM_A_TOKEN"
+          # Set the output so subsequent steps can use it.
+          echo "::set-output name=team_a_token::$TEAM_A_TOKEN"
 
-      - name: Trigger TFE Run (Simulated)
-        id: trigger-run
+      - name: Simulate Using the Ephemeral Token (e.g., Trigger TFE Run)
         run: |
-          echo "Using ephemeral TFE token: ${TFE_API_TOKEN}"
-          # Construct a sample payload for triggering a TFE run.
-          payload=$(cat <<EOF
-          {
-            "data": {
-              "attributes": {
-                "is-destroy": false,
-                "message": "Triggered from GitHub Actions with ephemeral token for team ${TEAM}"
-              },
-              "type": "runs",
-              "relationships": {
-                "workspace": {
-                  "data": {
-                    "type": "workspaces",
-                    "id": "${TFE_WORKSPACE}"
-                  }
-                }
-              }
-            }
-          }
-          EOF
-          )
-          echo "Payload: $payload"
-          # For demonstration purposes, we simulate the API call.
-          # In a real setup, you would call the TFE API like this:
-          # response=$(curl -s -X POST "${TFE_URL}/api/v2/runs" \
-          #   -H "Authorization: Bearer ${TFE_API_TOKEN}" \
-          #   -H "Content-Type: application/vnd.api+json" \
-          #   -d "${payload}")
-          # echo "Response: $response"
-          echo "Simulated TFE run triggered with ephemeral token."
-
-      - name: Poll TFE Run Status (Simulated)
-        run: |
-          echo "Polling TFE run status simulation..."
-          # In a real scenario, you would poll the TFE API for the run status.
-          sleep 5
-          echo "Simulated run status: applied"
+          # Retrieve the token from the previous step.
+          TEAM_A_TOKEN="${{ steps.read-token.outputs.team_a_token }}"
+          echo "Using the ephemeral token for Team A: $TEAM_A_TOKEN"
+          # Here you would use the token for authenticating with Terraform Enterprise's API.
+          # For demonstration, we just output the token.
