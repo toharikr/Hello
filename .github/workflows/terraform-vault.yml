@@ -76,7 +76,7 @@ jobs:
         run: |
           # This writes a role configuration under the Terraform secrets engine for Team A.
           # Adjust parameters (such as token_policies, token_ttl, etc.) as required.
-          vault write terraform/roles/team-a \
+          vault write auth/github-jwt/terraform/roles/team-a \
             token_policies="team-a-policy" \
             token_ttl=3600 \
             token_max_ttl=7200 \
