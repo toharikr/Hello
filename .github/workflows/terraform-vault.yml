@@ -45,6 +45,26 @@ jobs:
           vault kv put secret/team-a config="Team A configuration data"
           vault kv get secret/team-a
 
+      - name: Create and Write Team-A Policy
+        run: |
+          echo "Creating team-a-policy.hcl..."
+          cat <<'EOF' > team-a-policy.hcl
+          # team-a-policy.hcl
+          # This policy allows read and list access to Team A's secrets
+          path "secret/team-a/*" {
+            capabilities = ["read", "list"]
+          }
+          
+          # Optionally, allow read access to the Terraform secrets engine paths
+          path "terraform/*" {
+            capabilities = ["read", "list"]
+          }
+          EOF
+          echo "Writing team-a-policy to Vault..."
+          vault policy write team-a-policy team-a-policy.hcl
+          echo "Reading team-a-policy from Vault:"
+          vault policy read team-a-policy
+
       - name: Enable Terraform Secrets Engine
         run: |
           # Enable the Terraform secrets engine at the path "terraform/".
