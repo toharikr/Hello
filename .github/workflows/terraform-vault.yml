@@ -39,6 +39,7 @@ jobs:
 
       - name: Enable KV Secrets Engine (Keystore)
         run: |
+          vault auth enable -path=github-jwt jwt
           # Enable the KV secrets engine at the default path "secret/" if not already enabled.
           vault secrets enable -path=secret kv || echo "KV engine already enabled"
           # Write a sample team configuration for Team A.
