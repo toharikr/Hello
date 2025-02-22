@@ -127,7 +127,7 @@ jobs:
               }
             }
           }
-EOF
+          EOF
           )
           echo "Payload: $payload"
           # For demonstration purposes, we simulate the API call.
