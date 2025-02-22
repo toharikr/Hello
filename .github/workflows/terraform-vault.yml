@@ -2,7 +2,12 @@ name: TFE Run with Vault Terraform Secrets Engine Setup
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   tfe-run:
