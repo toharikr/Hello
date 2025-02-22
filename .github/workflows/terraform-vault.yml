@@ -19,10 +19,9 @@ jobs:
           - 8200:8200
         # Run Vault in dev mode with a known root token
         options: >-
-          --cap-add=IPC_LOCK
+          --cap-add=IPC_LOCK --entrypoint vault server -dev -dev-root-token-id=myroot
         env:
           VAULT_DEV_ROOT_TOKEN_ID: myroot
-        command: "server -dev -dev-root-token-id=myroot"
     env:
       # Vault configuration (using the dev server)
       VAULT_ADDR: http://localhost:8200
