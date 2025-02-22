@@ -1,4 +1,4 @@
-name: TFE Run with Vault Terraform Secrets Engine Setup
+name: TFE Run with Vault Terraform Secrets Engine
 
 on:
   push:
