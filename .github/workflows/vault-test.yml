@@ -3,7 +3,7 @@ name: Setup Vault, Configure Policy and Role, Retrieve Secret
 on:
   push:
     branches:
-      - master
+      - master1
 
 permissions:
   id-token: write
